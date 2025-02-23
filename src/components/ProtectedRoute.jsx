@@ -12,8 +12,6 @@ const ProtectedRoute = ({ children }) => {
             try {
                 const session = await authService.getSession();
                 const hasValidSession = !!session?.user;
-                console.log('Protected Route Session:', session); // Debug log
-                console.log('Protected Route Auth Status:', hasValidSession); // Debug log
                 setIsAuthenticated(hasValidSession);
             } catch (error) {
                 console.error('Protected Route Auth check failed:', error);
@@ -26,7 +24,6 @@ const ProtectedRoute = ({ children }) => {
 
         const authListener = authService.onAuthStateChange((event, session) => {
             const hasValidSession = !!session?.user;
-            console.log('Protected Route Auth Change:', hasValidSession); // Debug log
             setIsAuthenticated(hasValidSession);
         });
 

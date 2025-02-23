@@ -112,6 +112,19 @@ export const authService = {
         return supabase.auth.onAuthStateChange((event, session) => {
             callback(event, session);
         });
-    }
+    },
 
+    // Add password update method
+    async updatePassword(newPassword) {
+        try {
+            const { data, error } = await supabase.auth.updateUser({
+                password: newPassword
+            });
+            
+            if (error) throw error;
+            return { data, error: null };
+        } catch (error) {
+            return { data: null, error };
+        }
+    }
 };
