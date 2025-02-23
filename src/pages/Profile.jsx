@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../authentication/authService';
 import { likeService, commentService } from '../database/supabaseService';
+import AddSuccessStory from '../components/AddSuccessStory';
 
 export function Profile() {
     const navigate = useNavigate();
@@ -201,6 +202,9 @@ export function Profile() {
                             </button>
                         </div>
                     </div>
+
+
+                    <AddSuccessStory onSuccess={console.log("Called")} />
                 </div>
             </div>
         </div>
