@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import heroImage from '../assets/hero-breakup.svg'  // Add this import
 
 function Hero() {
   return (
@@ -59,7 +60,7 @@ function Hero() {
           <div className="flex-1 relative">
             <div className="absolute inset-0 bg-gradient-to-r from-pink-200 to-purple-200 rounded-full blur-3xl opacity-30"></div>
             <img
-              src="/src/assets/hero-breakup.svg"
+              src={heroImage}  // Change this line
               alt="Love Analysis"
               className="relative z-10 w-full max-w-2xl mx-auto drop-shadow-2xl hover:scale-105 transition-transform duration-500"
             />
