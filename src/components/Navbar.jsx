@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { authService } from '../authentication/authService'
 
 function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
     const [scrolled, setScrolled] = useState(false)
+    const [isAuthenticated, setIsAuthenticated] = useState(false)
     const location = useLocation()
 
     useEffect(() => {
@@ -12,6 +14,32 @@ function Navbar() {
         }
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
+
+    useEffect(() => {
+        // Check initial auth status
+        const checkAuth = async () => {
+            try {
+                const session = await authService.getSession()
+                setIsAuthenticated(!!session?.user) // Changed to check for session.user
+                console.log('Navbar Auth Status:', !!session?.user) // Debug log
+            } catch (error) {
+                console.error('Auth check failed:', error)
+                setIsAuthenticated(false)
+            }
+        }
+        checkAuth()
+
+        const authListener = authService.onAuthStateChange((event, session) => {
+            setIsAuthenticated(!!session?.user) // Changed to check for session.user
+            console.log('Navbar Auth Change:', !!session?.user) // Debug log
+        })
+
+        return () => {
+            if (authListener?.subscription) {
+                authListener.subscription.unsubscribe()
+            }
+        }
     }, [])
 
     return (
@@ -35,22 +63,65 @@ function Navbar() {
                                 key={item}
                                 to={item === 'Home' ? '/' : `/${item.toLowerCase().replace(' ', '-')}`}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${location.pathname === (item === 'Home' ? '/' : `/${item.toLowerCase().replace(' ', '-')}`)
-                                        ? 'bg-black text-white'
-                                        : 'text-gray-600 hover:bg-gray-100'
+                                    ? 'bg-black text-white'
+                                    : 'text-gray-600 hover:bg-gray-100'
                                     }`}
                             >
                                 {item}
                             </Link>
                         ))}
                         <Link
-                            to="/predict"
+                            to={isAuthenticated ? "/predict" : "/auth"}
                             className="ml-4 px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center gap-2"
                         >
-                            <span>Try Free</span>
+                            <span>{isAuthenticated ? 'Try Free' : 'Login'}</span>
                             <span className="animate-pulse">✨</span>
                         </Link>
+                        {isAuthenticated && (
+                            <Link
+                                to="/profile"
+                                className="ml-4 w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white hover:shadow-lg hover:scale-105 transition-all duration-300"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </Link>
+                        )}
                     </div>
 
+                    {/* Mobile Menu */}
+                    {isOpen && (
+                        <div className="md:hidden absolute left-0 right-0 top-full mt-2 p-4 bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl mx-4 border border-gray-100">
+                            <div className="space-y-2">
+                                {['Home', 'Success Stories'].map((item) => (
+                                    <Link
+                                        key={item}
+                                        to={item === 'Home' ? '/' : `/${item.toLowerCase().replace(' ', '-')}`}
+                                        className="block px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors"
+                                        onClick={() => setIsOpen(false)}
+                                    >
+                                        {item}
+                                    </Link>
+                                ))}
+                                <Link
+                                    to={isAuthenticated ? "/predict" : "/auth"}
+                                    className="block mt-4 px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl text-center"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    {isAuthenticated ? 'Try Free ✨' : 'Login ✨'}
+                                </Link>
+                                {isAuthenticated && (
+                                    <Link
+                                        to="/profile"
+                                        className="block px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors"
+                                        onClick={() => setIsOpen(false)}
+                                    >
+                                        Profile
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
+                    )}
                     {/* Mobile Menu Button */}
                     <button
                         onClick={() => setIsOpen(!isOpen)}

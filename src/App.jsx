@@ -3,6 +3,10 @@ import './App.css'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import SuccessStories from './pages/SuccessStories'
+import Auth from './pages/Auth'
+import { Profile } from './pages/Profile'
+import ProtectedRoute from './components/ProtectedRoute'
+import NotFound from './pages/NotFound'
 
 function App() {
   return (
@@ -12,7 +16,19 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/success-stories" element={<SuccessStories />} />
-          {/* Add more routes here when you create other pages */}
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/predict" element={
+            <ProtectedRoute>
+              <div>PredictionPage</div>
+            </ProtectedRoute>
+          } />
+          {/* 404 route - must be last */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </Router>
