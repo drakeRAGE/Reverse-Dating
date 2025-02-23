@@ -23,3 +23,24 @@
 .animation-delay-2000 {
     animation-delay: 2s;
 }
+
+/* Navbar animations */
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.nav-appear {
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+/* Add smooth scrolling to the whole page */
+html {
+  scroll-behavior: smooth;
+}
