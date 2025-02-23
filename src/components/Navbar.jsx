@@ -6,6 +6,8 @@ function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
     const [scrolled, setScrolled] = useState(false)
     const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [session, setSession] = useState(null)
+    const [profileImage, setProfileImage] = useState(false)
     const location = useLocation()
 
     useEffect(() => {
@@ -21,18 +23,19 @@ function Navbar() {
         const checkAuth = async () => {
             try {
                 const session = await authService.getSession()
-                setIsAuthenticated(!!session?.user) // Changed to check for session.user
-                console.log('Navbar Auth Status:', !!session?.user) // Debug log
+                setIsAuthenticated(!!session?.user)
+                setSession(session)
             } catch (error) {
                 console.error('Auth check failed:', error)
                 setIsAuthenticated(false)
+                setSession(null)
             }
         }
         checkAuth()
 
         const authListener = authService.onAuthStateChange((event, session) => {
-            setIsAuthenticated(!!session?.user) // Changed to check for session.user
-            console.log('Navbar Auth Change:', !!session?.user) // Debug log
+            setIsAuthenticated(!!session?.user)
+            setSession(session)
         })
 
         return () => {
@@ -82,9 +85,15 @@ function Navbar() {
                                 to="/profile"
                                 className="ml-4 w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white hover:shadow-lg hover:scale-105 transition-all duration-300"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
+                                {session?.user?.user_metadata?.avatar_url ? (
+                                    <img
+                                        src={session.user.user_metadata.avatar_url}
+                                        alt="Profile"
+                                        className="w-full h-full rounded-full object-cover"
+                                    />
+                                ) : (
+                                    <span className="text-xl">👤</span>
+                                )}
                             </Link>
                         )}
                     </div>
