@@ -23,7 +23,7 @@ function SuccessStories() {
     useEffect(() => {
         if (stories.length > 0) {
             loadLikesAndComments();
-            
+
             // Set up real-time subscriptions for each visible story
             const subscriptions = stories.slice(0, visibleStories).map(story => {
                 return subscribeToComments(story.id, 'success_story', (newComment) => {
@@ -31,7 +31,7 @@ function SuccessStories() {
                         // Only add the comment if it's not already in the list
                         const existingComments = prev[story.id] || [];
                         const isCommentExists = existingComments.some(c => c.id === newComment.id);
-                        
+
                         if (!isCommentExists) {
                             return {
                                 ...prev,
@@ -168,7 +168,7 @@ function SuccessStories() {
                         Real Stories of Healing
                     </h1>
                     <p className="text-lg text-gray-700">
-                        Discover how others turned their heartbreak into growth with HeartSplit
+                        Discover how others turned their heartbreak into growth with Blure
                     </p>
                 </motion.div>
 

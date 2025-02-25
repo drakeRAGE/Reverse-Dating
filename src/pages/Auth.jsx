@@ -138,7 +138,7 @@ function Auth() {
                                 <p className="mb-8 text-white/90 text-lg">
                                     {isLogin
                                         ? "Discover if your crush is your perfect match with our AI-powered analysis."
-                                        : "Join thousands of couples who found their true love through HeartSplit's intelligent matching."}
+                                        : "Join thousands of couples who found their true love through Blure's intelligent matching."}
                                 </p>
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-4">
@@ -168,18 +168,16 @@ function Auth() {
                                 <div className="inline-flex p-1 bg-gray-100 rounded-xl">
                                     <button
                                         type="button"
-                                        className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
-                                            isLogin ? 'bg-white text-gray-900 shadow-md' : 'text-gray-600 hover:text-gray-900'
-                                        }`}
+                                        className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${isLogin ? 'bg-white text-gray-900 shadow-md' : 'text-gray-600 hover:text-gray-900'
+                                            }`}
                                         onClick={() => toggleMode(true)}
                                     >
                                         Login
                                     </button>
                                     <button
                                         type="button"
-                                        className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
-                                            !isLogin ? 'bg-white text-gray-900 shadow-md' : 'text-gray-600 hover:text-gray-900'
-                                        }`}
+                                        className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${!isLogin ? 'bg-white text-gray-900 shadow-md' : 'text-gray-600 hover:text-gray-900'
+                                            }`}
                                         onClick={() => toggleMode(false)}
                                     >
                                         Sign Up

@@ -21,10 +21,10 @@ function AppShowcase() {
                         App Preview
                     </span>
                     <h2 className="text-5xl font-extrabold mb-6 bg-gradient-to-r from-pink-500 via-purple-500 to-purple-600 bg-clip-text text-transparent drop-shadow-md">
-                        Experience HeartSplit in Action
+                        Experience Blure in Action
                     </h2>
                     <p className="text-xl text-gray-900 leading-relaxed max-w-2xl mx-auto">
-                        Take a glimpse into how HeartSplit helps you navigate your relationship journey
+                        Take a glimpse into how Blure helps you navigate your relationship journey
                     </p>
                 </motion.div>
 
@@ -42,8 +42,8 @@ function AppShowcase() {
                             {/* Phone Screen */}
                             <div className="aspect-[9/19] bg-white overflow-hidden">
                                 <img
-                                    src="https://placehold.co/270x580/f3f4f6/6b7280?text=HeartSplit+App"
-                                    alt="HeartSplit App Interface"
+                                    src="https://placehold.co/270x580/f3f4f6/6b7280?text=Blure+App"
+                                    alt="Blure App Interface"
                                     className="w-full h-full object-cover"
                                 />
                             </div>
