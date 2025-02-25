@@ -51,11 +51,10 @@ function Navbar() {
                 <div className="flex items-center justify-between">
                     {/* Logo */}
                     <Link to="/" className="flex items-center space-x-3 group">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-purple-600 flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300">
-                            <span className="text-2xl">💘</span>
-                        </div>
+                        <img src="/logo.svg" alt="Logo" className="w-12 h-12 mt-2 rounded-full object-cover" />
+
                         <span className="font-extrabold text-3xl bg-gradient-to-r from-pink-500 via-purple-500 to-purple-600 bg-clip-text text-transparent drop-shadow-sm hover:drop-shadow-lg transition-all duration-300">
-                            HeartSplit{/* Logo */}
+                            Blure{/* Logo */}
                         </span>
                     </Link>
 
@@ -155,7 +154,7 @@ function Navbar() {
                 {isOpen && (
                     <div className="md:hidden absolute left-0 right-0 top-full mt-2 p-4 bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl mx-4 border border-gray-100">
                         <div className="space-y-2">
-                            {['Home', 'How it Works', 'Success Stories'].map((item) => (
+                            {['Home', 'Success Stories'].map((item) => (
                                 <Link
                                     key={item}
                                     to={item === 'Home' ? '/' : `/${item.toLowerCase().replace(' ', '-')}`}

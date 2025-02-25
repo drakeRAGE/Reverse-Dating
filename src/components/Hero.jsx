@@ -17,19 +17,19 @@ function Hero() {
           <div className="flex-1 text-center md:text-left space-y-8">
             <div className="inline-block px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm mb-4">
               <span className="text-sm font-medium text-gray-600">
-                🎯 95% Match Accuracy
+                🎯 98% Prediction Accuracy
               </span>
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold">
-              Find Your
+              Predict Your
               <span className="block mt-2 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500">
-                True Love Story
+                Relationship Future
               </span>
             </h1>
 
             <p className="text-xl text-gray-600 max-w-xl">
-              Discover if they're the one in seconds! Our AI knows if your crush is your perfect match ✨
+              Discover if your relationship will last! Our AI predicts relationship outcomes with incredible accuracy 💔
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
@@ -37,9 +37,9 @@ function Hero() {
                 to="/predict" 
                 className="group bg-black text-white px-8 py-4 rounded-full hover:scale-105 transition-all duration-300 flex items-center gap-2"
               >
-                Start Now
+                Check Now
                 <span className="group-hover:rotate-45 transition-transform duration-300">
-                  ⭐
+                  💘
                 </span>
               </Link>
               
@@ -50,7 +50,7 @@ function Hero() {
                   ))}
                 </div>
                 <span className="text-sm text-gray-600">
-                  Join 10K+ happy couples
+                  Trusted by 10K+ users
                 </span>
               </div>
             </div>
