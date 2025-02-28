@@ -296,7 +296,7 @@ function SuccessStories() {
                         <button
                             onClick={loadMoreStories}
                             disabled={isLoading}
-                            className="px-8 py-3 bg-transparent text-pink-500 border border-pink-200 rounded-xl hover:bg-pink-50/30 transition-all duration-300 disabled:opacity-50 backdrop-blur-md bg-white/30"
+                            className="px-8 py-3 bg-transparent text-pink-500 border border-pink-200 rounded-xl hover:bg-pink-50/30 transition-all duration-300 disabled:opacity-50 backdrop-blur-md"
                         >
                             {isLoading ? (
                                 <span className="flex items-center justify-center">

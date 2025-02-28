@@ -7,6 +7,7 @@ import Auth from './pages/Auth'
 import { Profile } from './pages/Profile'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFound from './pages/NotFound'
+import Predict from './pages/Predict'
 
 function App() {
   return (
@@ -24,7 +25,7 @@ function App() {
           } />
           <Route path="/predict" element={
             <ProtectedRoute>
-              <div>PredictionPage</div>
+              <Predict />
             </ProtectedRoute>
           } />
           {/* 404 route - must be last */}
