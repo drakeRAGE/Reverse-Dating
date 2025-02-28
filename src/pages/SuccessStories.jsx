@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import success1 from '../assets/success_stories1.jpeg';
-import success2 from '../assets/success_stories2.jpeg';
-import success3 from '../assets/success_stories3.jpeg';
+// Remove these imports as we won't need them anymore
+// import success1 from '../assets/success_stories1.jpeg';
+// import success2 from '../assets/success_stories2.jpeg';
+// import success3 from '../assets/success_stories3.jpeg';
 import { likeService, commentService, storyService, subscribeToComments } from '../database/supabaseService';
 import { authService } from '../authentication/authService';
 
@@ -59,12 +60,8 @@ function SuccessStories() {
         try {
             const { data, error } = await storyService.getStories();
             if (!error && data) {
-                // Assign random images to stories
-                const storiesWithImages = data.map(story => ({
-                    ...story,
-                    image: [success1, success2, success3][Math.floor(Math.random() * 3)]
-                }));
-                setStories(storiesWithImages);
+                // No need to assign random images anymore, use image_url from Supabase
+                setStories(data);
             }
         } finally {
             setIsLoading(false);
@@ -183,7 +180,7 @@ function SuccessStories() {
                         >
                             <div className="h-48 -mx-6 -mt-6 mb-6 relative bg-gradient-to-r from-pink-100 to-purple-100">
                                 <img
-                                    src={story.image}
+                                    src={story.image_url || 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?ixlib=rb-4.0.3'}
                                     alt={story.title}
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
@@ -261,7 +258,7 @@ function SuccessStories() {
                                             disabled={isSubmitting || !newComment.trim()}
                                             className="absolute right-2 top-1/2 -translate-y-1/2 text-pink-500 disabled:text-gray-300"
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rotate-90" viewBox="0 0 20 20" fill="currentColor">
                                                 <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                                             </svg>
                                         </button>
@@ -274,15 +271,6 @@ function SuccessStories() {
                             >
                                 Read Full Story →
                             </button>
-                            <div className="flex justify-between items-center mt-4">
-                                <span className="text-sm text-gray-500">{story.timeAgo}</span>
-                                <button
-                                    onClick={() => setSelectedStory(null)}
-                                    className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                                >
-                                    Close
-                                </button>
-                            </div>
                         </motion.div>
                     ))}
                 </div>

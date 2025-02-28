@@ -171,11 +171,13 @@ export const storyService = {
             .insert([{
                 title: story.title,
                 preview: story.preview,
-                full_story: story.fullStory,
+                full_story: story.full_story,  // Make sure this matches the incoming data
                 emotion: story.emotion,
-                user_id: story.user_id
-            }])
-            .select();
+                image_url: story.image_url,
+                user_id: story.user_id,
+                time_ago: story.time_ago,
+                created_at: new Date().toISOString()
+            }]);
         return { data, error };
     },
 };

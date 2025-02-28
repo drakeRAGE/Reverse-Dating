@@ -1,136 +1,180 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { storyService } from '../database/supabaseService';
 import { authService } from '../authentication/authService';
+import { storyService } from '../database/supabaseService';
+import { supabase } from '../database/supabaseService';
 
 function AddSuccessStory({ onSuccess }) {
     const [story, setStory] = useState({
         title: '',
         preview: '',
         fullStory: '',
-        emotion: '💖'
+        emotion: '❤️',
+        image: null
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState('');
 
-    const emotions = ['💖', '💪', '🎯', '🌟', '🦋', '🔍', '🌱', '🗝️', '⛓️', '🧘‍♀️', '💭', '📈', '🧭', '📖'];
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            setStory(prev => ({ ...prev, image: file }));
+        } else {
+            setError('Please select a valid image file');
+        }
+    };
+
+    const uploadImage = async (imageFile) => {
+        const fileName = `story${Date.now()}.jpg`;
+        const { data, error } = await supabase.storage
+            .from('story-images')
+            .upload(fileName, imageFile, {
+                cacheControl: '31536000',
+                upsert: true
+            });
+
+        if (error) throw error;
+
+        // Get the public URL instead of signed URL
+        const { data: { publicUrl } } = supabase.storage
+            .from('story-images')
+            .getPublicUrl(fileName);
+
+        return publicUrl;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!story.image) {
+            setError('Please upload an image for your story');
+            return;
+        }
+
         setIsSubmitting(true);
+        setError('');
 
         try {
             const session = await authService.getSession();
             if (!session?.user) {
-                alert('Please login to share your story');
-                return;
+                throw new Error('Please sign in to share your story');
             }
 
-            const { error } = await storyService.addStory({
-                ...story,
+            // First upload the image and get public URL
+            const imageUrl = await uploadImage(story.image);
+
+            // Then create the story with the image URL
+            const { data, error: uploadError } = await storyService.addStory({
+                title: story.title,
+                preview: story.preview,
+                full_story: story.fullStory,  // This should match the database column name
+                emotion: story.emotion,
+                image_url: imageUrl,
                 user_id: session.user.id,
-                created_at: new Date().toISOString()
+                time_ago: 'Just now'
             });
 
-            if (error) {
-                console.error('Error:', error.message);
-                alert('Failed to add story. Please try again.');
-                return;
-            }
+            if (uploadError) throw uploadError;
             
             setStory({
                 title: '',
                 preview: '',
-                fullStory: '',
-                emotion: '💖'
+                fullStory: '', // Keep the React state name consistent
+                emotion: '❤️',
+                image: null
             });
-            
-            alert('Your story has been shared successfully!');
-            if (onSuccess) onSuccess();
-        } catch (error) {
-            console.error('Error adding story:', error);
-            alert('Failed to add story. Please try again.');
+            onSuccess?.(data);
+        } catch (err) {
+            setError(err.message);
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-6 rounded-2xl shadow-lg"
-        >
-            <h3 className="text-2xl font-bold mb-6 text-gray-800">Share Your Success Story</h3>
+        <div className="p-8 bg-white rounded-2xl shadow-sm">
+            <h2 className="text-2xl font-bold mb-6">Share Your Success Story</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Choose an Emotion
+                        Story Image *
                     </label>
-                    <div className="flex flex-wrap gap-2">
-                        {emotions.map((emoji) => (
-                            <button
-                                key={emoji}
-                                type="button"
-                                onClick={() => setStory(prev => ({ ...prev, emotion: emoji }))}
-                                className={`text-2xl p-2 rounded-full transition-all ${
-                                    story.emotion === emoji 
-                                    ? 'bg-pink-100 scale-110' 
-                                    : 'hover:bg-gray-100'
-                                }`}
-                            >
-                                {emoji}
-                            </button>
-                        ))}
-                    </div>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200"
+                        required
+                    />
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Title
+                        Title *
                     </label>
                     <input
                         type="text"
                         value={story.title}
                         onChange={(e) => setStory(prev => ({ ...prev, title: e.target.value }))}
-                        className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200"
                         required
                     />
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Preview
+                        Preview *
                     </label>
-                    <input
-                        type="text"
+                    <textarea
                         value={story.preview}
                         onChange={(e) => setStory(prev => ({ ...prev, preview: e.target.value }))}
-                        className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200"
+                        rows="3"
                         required
                     />
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Your Story
+                        Full Story *
                     </label>
                     <textarea
                         value={story.fullStory}
                         onChange={(e) => setStory(prev => ({ ...prev, fullStory: e.target.value }))}
-                        className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent h-40"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200"
+                        rows="6"
                         required
                     />
                 </div>
 
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Emotion
+                    </label>
+                    <select
+                        value={story.emotion}
+                        onChange={(e) => setStory(prev => ({ ...prev, emotion: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200"
+                    >
+                        <option value="❤️">❤️ Love</option>
+                        <option value="✨">✨ Hope</option>
+                        <option value="💪">💪 Strength</option>
+                        <option value="🌟">🌟 Growth</option>
+                        <option value="🙏">🙏 Gratitude</option>
+                    </select>
+                </div>
+
+                {error && (
+                    <p className="text-rose-500 text-sm">{error}</p>
+                )}
+
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full px-6 py-3 bg-pink-500 text-white rounded-xl hover:bg-pink-600 disabled:opacity-50 transition-colors"
+                    className="w-full px-6 py-3 bg-violet-500 text-white rounded-xl hover:bg-violet-600 transition-all disabled:opacity-50"
                 >
                     {isSubmitting ? 'Sharing...' : 'Share Your Story'}
                 </button>
             </form>
-        </motion.div>
+        </div>
     );
 }
 

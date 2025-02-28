@@ -202,9 +202,12 @@ export function Profile() {
                             </button>
                         </div>
                     </div>
-
-
-                    <AddSuccessStory onSuccess={console.log("Called")} />
+                    <AddSuccessStory
+                        onSuccess={() => {
+                            // You can add a success message or refresh the stories list
+                            alert('Your story has been shared successfully!');
+                        }}
+                    />
                 </div>
             </div>
         </div>
