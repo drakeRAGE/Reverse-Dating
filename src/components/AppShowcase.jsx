@@ -21,10 +21,10 @@ function AppShowcase() {
                         App Preview
                     </span>
                     <h2 className="text-5xl font-extrabold mb-6 bg-gradient-to-r from-pink-500 via-purple-500 to-purple-600 bg-clip-text text-transparent drop-shadow-md">
-                        Experience Blure in Action
+                        Experience Blures in Action
                     </h2>
                     <p className="text-xl text-gray-900 leading-relaxed max-w-2xl mx-auto">
-                        Take a glimpse into how Blure helps you navigate your relationship journey
+                        Take a glimpse into how Blures helps you navigate your relationship journey
                     </p>
                 </motion.div>
 
@@ -43,7 +43,7 @@ function AppShowcase() {
                             <div className="aspect-[9/19] bg-white overflow-hidden">
                                 <img
                                     src="/main_page_pic.png"
-                                    alt="Blure App Interface"
+                                    alt="Blures App Interface"
                                     className="w-full h-full object-cover"
                                 />
                             </div>

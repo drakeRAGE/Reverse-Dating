@@ -17,7 +17,7 @@ function Footer() {
                             className="space-y-4"
                         >
                             <h3 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                                Blure
+                                Blures
                             </h3>
                             <p className="text-gray-600 leading-relaxed">
                                 Revolutionizing relationships with AI-powered insights and predictions.
@@ -65,7 +65,7 @@ function Footer() {
                         transition={{ duration: 0.5, delay: 0.3 }}
                         className="pt-8 border-t border-gray-200/30 text-center text-gray-600 text-sm"
                     >
-                        <p>© {new Date().getFullYear()} Blure. All rights reserved.</p>
+                        <p>© {new Date().getFullYear()} Blures. All rights reserved.</p>
                     </motion.div>
                 </div>
             </div>

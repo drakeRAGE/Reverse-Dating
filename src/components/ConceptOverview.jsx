@@ -39,7 +39,7 @@ function ConceptOverview() {
                         Know Before It Breaks 💔
                     </h2>
                     <p className="text-lg text-gray-700 leading-relaxed">
-                        Tired of the same old dating apps that only focus on matches? We're different. Blure uses AI to predict potential relationship challenges before they hit. Think of it as your relationship's early warning system - because sometimes love needs a heads-up.
+                        Tired of the same old dating apps that only focus on matches? We're different. Blures uses AI to predict potential relationship challenges before they hit. Think of it as your relationship's early warning system - because sometimes love needs a heads-up.
                     </p>
                 </motion.div>
 

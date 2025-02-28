@@ -138,7 +138,7 @@ function Auth() {
                                 <p className="mb-8 text-white/90 text-lg">
                                     {isLogin
                                         ? "Discover if your crush is your perfect match with our AI-powered analysis."
-                                        : "Join thousands of couples who found their true love through Blure's intelligent matching."}
+                                        : "Join thousands of couples who found their true love through Blures's intelligent matching."}
                                 </p>
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-4">

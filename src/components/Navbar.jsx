@@ -54,7 +54,7 @@ function Navbar() {
                         <img src="/logo.svg" alt="Logo" className="w-12 h-12 mt-2 rounded-full object-cover" />
 
                         <span className="font-extrabold text-3xl bg-gradient-to-r from-pink-500 via-purple-500 to-purple-600 bg-clip-text text-transparent drop-shadow-sm hover:drop-shadow-lg transition-all duration-300">
-                            Blure{/* Logo */}
+                            Blures{/* Logo */}
                         </span>
                     </Link>
 

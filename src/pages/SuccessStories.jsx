@@ -165,7 +165,7 @@ function SuccessStories() {
                         Real Stories of Healing
                     </h1>
                     <p className="text-lg text-gray-700">
-                        Discover how others turned their heartbreak into growth with Blure
+                        Discover how others turned their heartbreak into growth with Blures
                     </p>
                 </motion.div>
 
