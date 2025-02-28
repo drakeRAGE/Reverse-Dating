@@ -42,7 +42,7 @@ function AppShowcase() {
                             {/* Phone Screen */}
                             <div className="aspect-[9/19] bg-white overflow-hidden">
                                 <img
-                                    src="https://placehold.co/270x580/f3f4f6/6b7280?text=Blure+App"
+                                    src="/main_page_pic.png"
                                     alt="Blure App Interface"
                                     className="w-full h-full object-cover"
                                 />
@@ -64,7 +64,7 @@ function AppShowcase() {
                         whileInView={{ opacity: 1 }}
                         viewport={{ amount: 0.3 }}
                         transition={{ duration: 1, delay: 0.5 }}
-                        className="absolute inset-0 pointer-events-none"
+                        className="absolute inset-0 pointer-events-none hidden md:block" // Modified this line
                     >
                         <div className="absolute top-1/4 -right-32 md:-right-40 bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-lg">
                             <p className="text-sm font-medium text-gray-800">AI-Powered Analysis</p>
