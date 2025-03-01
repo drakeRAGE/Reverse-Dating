@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import SuccessStories from './pages/SuccessStories'
 import Auth from './pages/Auth'
 import { Profile } from './pages/Profile'
+import About from './pages/About'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFound from './pages/NotFound'
 import Predict from './pages/Predict'
@@ -17,6 +18,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/success-stories" element={<SuccessStories />} />
+          <Route path="/about" element={<About />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile" element={
             <ProtectedRoute>
@@ -28,7 +30,6 @@ function App() {
               <Predict />
             </ProtectedRoute>
           } />
-          {/* 404 route - must be last */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
