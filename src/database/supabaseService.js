@@ -10,43 +10,73 @@ if (!supabaseUrl || !supabaseKey) {
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const subscribeToComments = (targetId, type, callback) => {
-    return supabase
-        .channel(`comments-${targetId}-${type}`)
+    console.log(`[Realtime] Creating subscription for target ${targetId}, type: ${type}`);
+    
+    const channel = supabase
+        .channel(`comments-${targetId}-${type}`, {
+            config: {
+                broadcast: { self: true }
+            }
+        })
         .on(
             'postgres_changes',
             {
                 event: 'INSERT',
                 schema: 'public',
                 table: 'comments',
-                filter: `target_id=eq.${targetId}&type=eq.${type}`
+                filter: `target_id=eq.${targetId}`
             },
             async (payload) => {
-                const { data, error } = await supabase
+                console.log('[Realtime] Comment INSERT event received:', payload);
+                
+                // Check if this comment matches our type filter
+                if (payload.new.type !== type) {
+                    console.log('[Realtime] Comment type mismatch, ignoring');
+                    return;
+                }
+                
+                const { data: comment, error } = await supabase
                     .from('comments')
-                    .select(`
-                        *,
-                        user:user_profiles!user_id (
-                            username,
-                            avatar_url
-                        )
-                    `)
+                    .select('*')
                     .eq('id', payload.new.id)
                     .single();
 
-                if (!error && data) {
+                if (error) {
+                    console.error('[Realtime] Error fetching comment:', error);
+                    return;
+                }
+
+                if (comment) {
+                    console.log('[Realtime] Fetched comment:', comment);
+                    
+                    // Fetch user profile separately
+                    const { data: profile } = await supabase
+                        .from('user_profiles')
+                        .select('username, avatar_url')
+                        .eq('user_id', comment.user_id)
+                        .single();
+
+                    console.log('[Realtime] Fetched profile:', profile);
+
                     const transformedComment = {
-                        ...data,
+                        ...comment,
                         profiles: {
-                            username: data.user?.username || 'User',
-                            avatar_url: data.user?.avatar_url || 
-                                      `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.user_id}&backgroundColor=random`
+                            username: profile?.username || 'User',
+                            avatar_url: profile?.avatar_url || 
+                                      `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user_id}&backgroundColor=random`
                         }
                     };
+                    
+                    console.log('[Realtime] Calling callback with transformed comment');
                     callback(transformedComment);
                 }
             }
         )
-        .subscribe();
+        .subscribe((status) => {
+            console.log(`[Realtime] Subscription status for target ${targetId}:`, status);
+        });
+    
+    return channel;
 };
 
 // Likes related functions
@@ -94,24 +124,40 @@ export const commentService = {
                 type: type, 
                 content: content 
             }])
-            .select(`
-                *,
-                user:user_profiles!user_id (
-                    username,
-                    avatar_url
-                )
-            `);
+            .select();
+        
         if (insertError) {
             console.error('Error adding comment:', insertError);
             return { data: null, error: insertError };
+        }
+
+        // Fetch the user profile separately
+        let { data: profile, error: profileError } = await supabase
+            .from('user_profiles')
+            .select('username, avatar_url')
+            .eq('user_id', userId)
+            .single();
+
+        // If profile doesn't exist, create one
+        if (profileError && profileError.code === 'PGRST116') {
+            const { data: newProfile } = await supabase
+                .from('user_profiles')
+                .insert([{
+                    user_id: userId,
+                    username: 'User',
+                    avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`
+                }])
+                .select()
+                .single();
+            profile = newProfile;
         }
 
         // Transform the new comment to match the expected format
         const transformedComment = newComment?.map(comment => ({
             ...comment,
             profiles: {
-                username: comment.user?.username || 'User',
-                avatar_url: comment.user?.avatar_url || 
+                username: profile?.username || 'User',
+                avatar_url: profile?.avatar_url || 
                           `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user_id}&backgroundColor=random`
             }
         }));
@@ -119,15 +165,9 @@ export const commentService = {
         return { data: transformedComment, error: null };
     },
     async getComments(targetId, type) {
-        const { data, error } = await supabase
+        const { data: comments, error } = await supabase
             .from('comments')
-            .select(`
-                *,
-                user:user_profiles!user_id (
-                    username,
-                    avatar_url
-                )
-            `)
+            .select('*')
             .eq('target_id', Number(targetId))
             .eq('type', type)
             .order('created_at', { ascending: false });
@@ -136,17 +176,34 @@ export const commentService = {
             console.error('Error fetching comments:', error);
             return { data: [], error };
         }
+
+        if (!comments || comments.length === 0) {
+            return { data: [], error: null };
+        }
+
+        // Fetch all user profiles for these comments
+        const userIds = [...new Set(comments.map(c => c.user_id))];
+        const { data: profiles } = await supabase
+            .from('user_profiles')
+            .select('user_id, username, avatar_url')
+            .in('user_id', userIds);
+
+        // Create a map for quick lookup
+        const profileMap = {};
+        profiles?.forEach(p => {
+            profileMap[p.user_id] = p;
+        });
         
         return { 
-            data: data?.map(comment => ({
+            data: comments.map(comment => ({
                 ...comment,
                 profiles: {
-                    username: comment.user?.username || 'User',
-                    avatar_url: comment.user?.avatar_url || 
+                    username: profileMap[comment.user_id]?.username || 'User',
+                    avatar_url: profileMap[comment.user_id]?.avatar_url || 
                               `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user_id}&backgroundColor=random`
                 }
-            })) || [],
-            error
+            })),
+            error: null
         };
     }
 };

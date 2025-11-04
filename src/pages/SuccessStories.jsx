@@ -14,8 +14,8 @@ function SuccessStories() {
     const [isLoading, setIsLoading] = useState(false);
     const [storyLikes, setStoryLikes] = useState({});
     const [storyComments, setStoryComments] = useState({});
-    const [newComment, setNewComment] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [newComment, setNewComment] = useState({});  // Changed to object for per-story comments
+    const [isSubmitting, setIsSubmitting] = useState({});  // Changed to object for per-story submission state
 
     useEffect(() => {
         loadStories();
@@ -26,18 +26,24 @@ function SuccessStories() {
             loadLikesAndComments();
 
             // Set up real-time subscriptions for each visible story
+            console.log('Setting up real-time subscriptions for', stories.length, 'stories');
             const subscriptions = stories.slice(0, visibleStories).map(story => {
+                console.log('Subscribing to comments for story:', story.id);
                 return subscribeToComments(story.id, 'success_story', (newComment) => {
+                    console.log('Real-time comment received for story', story.id, ':', newComment);
                     setStoryComments(prev => {
                         // Only add the comment if it's not already in the list
                         const existingComments = prev[story.id] || [];
                         const isCommentExists = existingComments.some(c => c.id === newComment.id);
 
                         if (!isCommentExists) {
+                            console.log('Adding new comment to state');
                             return {
                                 ...prev,
                                 [story.id]: [newComment, ...existingComments]
                             };
+                        } else {
+                            console.log('Comment already exists, skipping');
                         }
                         return prev;
                     });
@@ -46,6 +52,7 @@ function SuccessStories() {
 
             // Cleanup subscriptions
             return () => {
+                console.log('Cleaning up subscriptions');
                 subscriptions.forEach(subscription => {
                     if (subscription?.unsubscribe) {
                         subscription.unsubscribe();
@@ -59,10 +66,18 @@ function SuccessStories() {
         setIsLoading(true);
         try {
             const { data, error } = await storyService.getStories();
-            if (!error && data) {
-                // No need to assign random images anymore, use image_url from Supabase
+            if (error) {
+                console.error('Error loading stories:', error);
+                // You can show an error message to user here if needed
+            } else if (data) {
+                console.log('Stories loaded:', data.length);
                 setStories(data);
+            } else {
+                console.log('No stories found in database');
+                setStories([]);
             }
+        } catch (err) {
+            console.error('Exception loading stories:', err);
         } finally {
             setIsLoading(false);
         }
@@ -126,29 +141,31 @@ function SuccessStories() {
     };
 
     const handleComment = async (storyId) => {
-        if (!newComment.trim()) return;
+        const commentText = newComment[storyId] || '';
+        if (!commentText.trim()) return;
 
         const session = await authService.getSession();
         if (!session?.user) return;
 
-        setIsSubmitting(true);
+        setIsSubmitting(prev => ({ ...prev, [storyId]: true }));
         try {
-            const { data } = await commentService.addComment(
+            const { data, error } = await commentService.addComment(
                 session.user.id,
                 storyId,
                 'success_story',
-                newComment.trim()
+                commentText.trim()
             );
 
-            if (data) {
-                setStoryComments(prev => ({
-                    ...prev,
-                    [storyId]: [...(prev[storyId] || []), data[0]]
-                }));
-                setNewComment('');
+            if (error) {
+                console.error('Failed to add comment:', error);
+            } else if (data) {
+                console.log('Comment added successfully, real-time will update UI');
+                // Don't manually add to state - let real-time subscription handle it
+                // Clear only this story's comment input
+                setNewComment(prev => ({ ...prev, [storyId]: '' }));
             }
         } finally {
-            setIsSubmitting(false);
+            setIsSubmitting(prev => ({ ...prev, [storyId]: false }));
         }
     };
 
@@ -168,6 +185,24 @@ function SuccessStories() {
                         Discover how others turned their heartbreak into growth with Blures
                     </p>
                 </motion.div>
+
+                {/* Loading State */}
+                {isLoading && (
+                    <div className="text-center py-12">
+                        <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-pink-500 border-t-transparent"></div>
+                        <p className="mt-4 text-gray-600">Loading stories...</p>
+                    </div>
+                )}
+
+                {/* No Stories State */}
+                {!isLoading && stories.length === 0 && (
+                    <div className="text-center py-12 bg-white rounded-2xl shadow-lg max-w-2xl mx-auto">
+                        <div className="text-6xl mb-4">📖</div>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-2">No Stories Yet</h3>
+                        <p className="text-gray-600 mb-6">Be the first to share your healing journey!</p>
+                        <p className="text-sm text-gray-500">Stories will appear here once they are added to the database.</p>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {stories.slice(0, visibleStories).map((story, index) => (
@@ -228,18 +263,42 @@ function SuccessStories() {
                                     </div>
                                     <span className="text-sm text-gray-400">{story.timeAgo}</span>
                                 </div>
-                                {/* Recent comments */}
+                                {/* Comments section with scrollable area */}
                                 {storyComments[story.id]?.length > 0 && (
-                                    <div className="space-y-2 mb-3">
-                                        {storyComments[story.id]?.slice(0, 2).map((comment) => (
-                                            <div key={comment.id} className="flex items-start gap-2 text-sm">
-                                                <div className="w-6 h-6 rounded-full bg-gray-200 flex-shrink-0" />
-                                                <div className="flex-1 bg-gray-50 rounded-2xl p-2">
-                                                    <p className="font-medium text-gray-900">{comment.profiles?.username || 'User'}</p>
-                                                    <p className="text-gray-600">{comment.content}</p>
+                                    <div className="mb-3 relative">
+                                        {/* Show comment count if more than 3 */}
+                                        {storyComments[story.id]?.length > 3 && (
+                                            <p className="text-xs text-gray-500 mb-2 px-1 flex items-center gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+                                                </svg>
+                                                {storyComments[story.id]?.length} comments
+                                            </p>
+                                        )}
+                                        {/* Scrollable comments container */}
+                                        <div 
+                                            className="space-y-2 max-h-60 overflow-y-auto pr-2 relative"
+                                            style={{
+                                                scrollbarWidth: 'thin',
+                                                scrollbarColor: '#E5E7EB transparent'
+                                            }}
+                                        >
+                                            {storyComments[story.id]?.map((comment) => (
+                                                <div key={comment.id} className="flex items-start gap-2 text-sm">
+                                                    <img 
+                                                        src={comment.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user_id}`}
+                                                        alt={comment.profiles?.username || 'User'}
+                                                        className="w-6 h-6 rounded-full flex-shrink-0"
+                                                    />
+                                                    <div className="flex-1 bg-gray-50 rounded-2xl p-2.5">
+                                                        <p className="font-semibold text-gray-900 text-xs mb-0.5">
+                                                            {comment.profiles?.username || 'User'}
+                                                        </p>
+                                                        <p className="text-gray-700 text-sm leading-relaxed">{comment.content}</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
                                 {/* Comment input */}
@@ -249,14 +308,23 @@ function SuccessStories() {
                                         <input
                                             type="text"
                                             placeholder="Write a comment..."
-                                            value={newComment}
-                                            onChange={(e) => setNewComment(e.target.value)}
+                                            value={newComment[story.id] || ''}
+                                            onChange={(e) => setNewComment(prev => ({
+                                                ...prev,
+                                                [story.id]: e.target.value
+                                            }))}
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter' && !e.shiftKey) {
+                                                    e.preventDefault();
+                                                    handleComment(story.id);
+                                                }
+                                            }}
                                             className="w-full px-4 py-2 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/20 text-sm"
                                         />
                                         <button
                                             onClick={() => handleComment(story.id)}
-                                            disabled={isSubmitting || !newComment.trim()}
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-pink-500 disabled:text-gray-300"
+                                            disabled={isSubmitting[story.id] || !(newComment[story.id] || '').trim()}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-pink-500 disabled:text-gray-300 transition-colors"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rotate-90" viewBox="0 0 20 20" fill="currentColor">
                                                 <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />

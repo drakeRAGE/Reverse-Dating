@@ -61,3 +61,31 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* Custom scrollbar for comments section */
+/* For Webkit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #E5E7EB;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #D1D5DB;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #E5E7EB transparent;
+}
